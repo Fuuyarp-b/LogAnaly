@@ -1,8 +1,25 @@
 import { createClient } from '@supabase/supabase-js';
 import { AnalysisResult, HistoryEntry } from '../types';
 
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY;
+// Helper to get environment variables compatible with both Vite (import.meta.env) and standard process.env
+const getEnvVar = (key: string, viteKey: string): string | undefined => {
+  // Check for Vite's import.meta.env
+  // @ts-ignore
+  if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env[viteKey]) {
+    // @ts-ignore
+    return import.meta.env[viteKey];
+  }
+  
+  // Check for standard process.env (Fallback)
+  if (typeof process !== 'undefined' && process.env && process.env[key]) {
+    return process.env[key];
+  }
+  
+  return undefined;
+};
+
+const SUPABASE_URL = getEnvVar('SUPABASE_URL', 'VITE_SUPABASE_URL');
+const SUPABASE_KEY = getEnvVar('SUPABASE_ANON_KEY', 'VITE_SUPABASE_ANON_KEY');
 
 // Create a single supabase client for interacting with your database
 // We only initialize if keys are present to prevent crashing
