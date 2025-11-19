@@ -1,15 +1,31 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { AnalysisResult } from "../types";
 
-const API_KEY = process.env.API_KEY || '';
+// Helper to securely get the API Key compatible with Vite and standard Node environments
+const getApiKey = (): string => {
+  // Priority 1: Vite Standard (import.meta.env.VITE_API_KEY)
+  // @ts-ignore
+  if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_KEY) {
+    // @ts-ignore
+    return import.meta.env.VITE_API_KEY;
+  }
+
+  // Priority 2: Standard process.env (for non-Vite environments or custom defines)
+  if (typeof process !== 'undefined' && process.env && process.env.API_KEY) {
+    return process.env.API_KEY;
+  }
+
+  return '';
+};
+
+const API_KEY = getApiKey();
 
 // Initialize Gemini AI
-// Note: In a real Vite app, use import.meta.env.VITE_API_KEY, but strictly adhering to prompt rules for process.env.API_KEY
 const ai = new GoogleGenAI({ apiKey: API_KEY });
 
 export const analyzeLogs = async (logContent: string): Promise<AnalysisResult> => {
   if (!API_KEY) {
-    throw new Error("API Key is missing. Please check your environment variables.");
+    throw new Error("API Key is missing. Please check your environment variables (VITE_API_KEY).");
   }
 
   const modelId = 'gemini-2.5-flash';
